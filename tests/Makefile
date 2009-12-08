@@ -1,5 +1,5 @@
 
-subdirs = 	sharedvariable-test blockingqueue-test
+subdirs = 	kpn-simple-adder-test blockingqueue-test
 
 .PHONY: all
 all: $(subdirs)

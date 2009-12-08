@@ -22,6 +22,7 @@ namespace sacre
     std::map<std::string, boost::any> outPorts;
 
     void start(void);
+    pthread_t getThread();
     // if task is not pure virtual, I get strange behaviour at run-time.
     // there were times that Component.task() was called 
     // instead of DerivedComponent.task()
@@ -31,6 +32,7 @@ namespace sacre
       InPort<T>* inPort(std::string);
     template <typename T>
       OutPort<T>* outPort(std::string);
+    std::string getName();
 
   protected:
     std::string name;
@@ -38,8 +40,7 @@ namespace sacre
       void addInPort(std::string);
     template <typename T>
       void addOutPort(std::string);
-        
-  private:
+
     pthread_t thread;
     // return value of pthread_create
     int iret;
@@ -54,12 +55,23 @@ namespace sacre
 
   Component::~Component()
     {
-      // if the component gets out of scope, wait until thread finishes before destruction
-      if(thread != 0)
-	{
-	  pthread_join(thread, NULL);
-	  std::cout << "Component " << name << "'s pthread_create returned " << iret << std::endl;
-	}
+      // IMPORTANT NOTE:
+      // below join doesn't do what we intend to achieve. It is sometimes the case that
+      // DerivedComponent's destructor is called before its thread finishes and before 
+      // Component's destructor is called. In this case we get a 
+      // "pure virtual method called / terminate called without an active exception"
+      // error with an ABORT. 
+      // (see: http://tombarta.wordpress.com/2008/07/10/gcc-pure-virtual-method-called/)
+      // Solution for now is to move the below join to the end of main thread (e.g. main.cpp).
+      // OR move below join to the destructor of each deriving component.
+      
+      
+      /* // if the component gets out of scope, wait until thread finishes before destruction */
+      /* if(thread != 0) */
+      /* 	{ */
+      /* 	  pthread_join(thread, NULL); */
+      /* 	  std::cout << "Component " << name << "'s pthread_create returned " << iret << std::endl; */
+      /* 	} */
     }
 
   /*
@@ -123,7 +135,13 @@ namespace sacre
 
   void Component::start(void)
   {
+    // TODO: what to do with iret? Do we really need it?
     iret = pthread_create( &thread, NULL, task_cwrapper, (void*)this);
+  }
+
+  pthread_t Component::getThread()
+  {
+    return thread;
   }
 
   /*void* Component::task(void*)
@@ -137,6 +155,11 @@ namespace sacre
     c->task( (void*) NULL);
     return NULL;
   }
+
+  std::string Component::getName()
+    {
+      return name;
+    }
 
 }
 #endif

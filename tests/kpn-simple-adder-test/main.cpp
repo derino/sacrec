@@ -27,6 +27,27 @@ int main ()
   s2.start();
   a.start();
   d.start();
+
+
+  if( pthread_join( s1.getThread(), NULL) == 0 )
+    std::cout << "Component " << s1.getName() << "'s thread finished succesfully." << std::endl;
+
+  if( pthread_join( s2.getThread(), NULL) == 0 )
+    std::cout << "Component " << s2.getName() << "'s thread finished succesfully." << std::endl;
+
+  if( pthread_join( a.getThread(), NULL) == 0 )
+    std::cout << "Component " << a.getName() << "'s thread finished succesfully." << std::endl;
+
+  if( pthread_join( d.getThread(), NULL) == 0 )
+    std::cout << "Component " << d.getName() << "'s thread finished succesfully." << std::endl;
+
   
+  // Pipeline p = new Pipeline();
+  // p->add(s1);
+  // p->add(s2);
+  // p->add(a);
+  // p->add(d);
+  // p->run();
+
   return 0;
 }

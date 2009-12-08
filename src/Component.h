@@ -5,9 +5,11 @@
 #include <cstdlib>
 #include <string>
 #include <map>
+#include "boost/any.hpp"
 #include "Channel.h"
 #include "SharedVariable.h"
 #include "Token.h"
+#include "InPort.h"
 //class Channel;
 
 namespace sacre
@@ -19,6 +21,7 @@ namespace sacre
     Component(std::string);
     ~Component();
     std::map<std::string, Channel<Token*>*> channels;
+    std::map<std::string, boost::any> inPorts;
     void start(void);
     // if task is not pure virtual, I get strange behaviour at run-time.
     // there were times that Component.task() was called 
@@ -26,12 +29,16 @@ namespace sacre
     virtual void* task(void*) = 0;
     //template <typename T>
     Channel<Token*>*& operator[] (std::string);
-    
+    template <typename T>
+      InPort<T>* inPort(std::string);
+
   protected:
     std::string name;
     template <typename T>
     void addChannel(std::string);
-    void addSharedVariable(std::string);
+    template <typename T>
+      void addInPort(std::string);
+    //void addSharedVariable(std::string);
     
   private:
     pthread_t thread;
@@ -56,7 +63,7 @@ namespace sacre
 	}
     }
 
-  //template <typename T = Token>
+  //  template <typename T = Token>
   Channel<Token*>*& Component::operator[] (std::string chanName)
     {
       if(channels.count(chanName) == 0)
@@ -66,6 +73,22 @@ namespace sacre
 	}
 
       return channels[chanName];
+    }
+  
+  
+  template <typename T>
+    InPort<T>* Component::inPort( std::string portName)
+    {
+      try
+	{
+	  InPort<T>* ip =  boost::any_cast< InPort<T>* >(inPorts[portName]);
+	  return ip;
+	}
+      catch(boost::bad_any_cast&)
+	{
+	  std::cout << "FATAL ERROR: Tried to read a different token type from a port's supported type!\n";
+	}
+      return NULL;
     }
 
   template <typename T>
@@ -77,10 +100,20 @@ namespace sacre
       channels[chanName] = NULL;
     }
 
+  template <typename T>
+    void Component::addInPort(std::string portName)
+    {
+      // TODO: check if a port with portName already exists.
+      InPort<T>* ip = new InPort<T>(portName);
+      inPorts[portName] = ip;
+    }
+  
+  /*
   void Component::addSharedVariable(std::string sharedVarName)
   {
     addChannel<int>(sharedVarName);
   }
+  */
 
   void Component::start(void)
   {

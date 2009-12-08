@@ -26,12 +26,16 @@ int main ()
   Adder a("Adder");
   Display d("Display");
 
+  /*
   connect(s1["out"], a["in1"]);
   //connect(s1.operator[]<IntToken>("out"), a.operator[]<IntToken>("in1") );
   connect(s2["out"], a["in2"]);
   connect(a["out"], d["in"]);
+  */
 
-  //s1["out"] 
+  connect( s1.outPort<int>("out"), a.inPort<int>("in1") );
+  connect( s2.outPort<int>("out"), a.inPort<int>("in2") );
+  connect( a.outPort<int>("out"), d.inPort<int>("in") );
 
   //connect(s1["sharedcount"], s2["sharedcount"], a["sharedcount"], d["sharedcount"]);
   //SharedVariable<void*>* sv = new SharedVariable<void*>("sharedcount");

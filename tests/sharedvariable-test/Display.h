@@ -14,8 +14,8 @@ class Display: public Component
 
 Display::Display(std::string _name): Component(_name)
 {
-  addChannel<int>("in");
-  //addSharedVariable("sharedcount");
+  addInPort<int>("in");
+  //addChannel<int>("in");
 }
 
 void* Display::task(void* nullarg)
@@ -26,20 +26,23 @@ void* Display::task(void* nullarg)
   for(i=0; i<5; i++)
     {
       // read data from input and print
-      //printf("%s : step %d \n", thread_name, i);
-      //printf("Result: %d \n", as.read());
+      int res = this->inPort<int>("in")->read();
+      std::cout << this->name << " read "  << res << std::endl;
 
-      IntToken** it = new IntToken*;//(111);
-      channels["in"]->read((Token**)it);
-      std::cout << this->name << " read "  << (*it)->getData() << std::endl;
-      /*int** t_a = new int*;
-      void** a = (void**)t_a;
-      channels["in"]->read(a);
-      int* tt_a = (int*)*a;
-      std::cout << this->name << " read "  << *tt_a << std::endl;*/
-      //std::cout << "Result: " << *tt_a << std::endl;
+      /* //printf("%s : step %d \n", thread_name, i); */
+      /* //printf("Result: %d \n", as.read()); */
+
+      /* IntToken** it = new IntToken*;//(111); */
+      /* channels["in"]->read((Token**)it); */
+      /* std::cout << this->name << " read "  << (*it)->getData() << std::endl; */
+      /* /\*int** t_a = new int*; */
+      /* void** a = (void**)t_a; */
+      /* channels["in"]->read(a); */
+      /* int* tt_a = (int*)*a; */
+      /* std::cout << this->name << " read "  << *tt_a << std::endl;*\/ */
+      /* //std::cout << "Result: " << *tt_a << std::endl; */
       
-      //channels["sharedcount"]->write( channels["sharedcount"]->read()+1 );
+      /* //channels["sharedcount"]->write( channels["sharedcount"]->read()+1 ); */
     }
 
   //std::cout << channels["sharedcount"]->read();

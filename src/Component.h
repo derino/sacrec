@@ -10,6 +10,7 @@
 #include "SharedVariable.h"
 #include "Token.h"
 #include "InPort.h"
+#include "OutPort.h"
 //class Channel;
 
 namespace sacre
@@ -22,6 +23,8 @@ namespace sacre
     ~Component();
     std::map<std::string, Channel<Token*>*> channels;
     std::map<std::string, boost::any> inPorts;
+    std::map<std::string, boost::any> outPorts;
+
     void start(void);
     // if task is not pure virtual, I get strange behaviour at run-time.
     // there were times that Component.task() was called 
@@ -31,6 +34,8 @@ namespace sacre
     Channel<Token*>*& operator[] (std::string);
     template <typename T>
       InPort<T>* inPort(std::string);
+    template <typename T>
+      OutPort<T>* outPort(std::string);
 
   protected:
     std::string name;
@@ -38,6 +43,8 @@ namespace sacre
     void addChannel(std::string);
     template <typename T>
       void addInPort(std::string);
+    template <typename T>
+      void addOutPort(std::string);
     //void addSharedVariable(std::string);
     
   private:
@@ -86,7 +93,22 @@ namespace sacre
 	}
       catch(boost::bad_any_cast&)
 	{
-	  std::cout << "FATAL ERROR: Tried to read a different token type from a port's supported type!\n";
+	  std::cout << "FATAL ERROR: Tried to use the port with a different token type than its supported type!\n";
+	}
+      return NULL;
+    }
+
+  template <typename T>
+    OutPort<T>* Component::outPort( std::string portName)
+    {
+      try
+	{
+	  OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
+	  return op;
+	}
+      catch(boost::bad_any_cast&)
+	{
+	  std::cout << "FATAL ERROR: Tried to use the port with a different token type than its supported type!\n";
 	}
       return NULL;
     }
@@ -108,6 +130,14 @@ namespace sacre
       inPorts[portName] = ip;
     }
   
+  template <typename T>
+    void Component::addOutPort(std::string portName)
+    {
+      // TODO: check if a port with portName already exists.
+      OutPort<T>* op = new OutPort<T>(portName);
+      outPorts[portName] = op;
+    }
+
   /*
   void Component::addSharedVariable(std::string sharedVarName)
   {

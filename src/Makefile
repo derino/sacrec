@@ -22,15 +22,17 @@ LDFLAGS := $(PKG_LDFLAGS) $(ADD_LDFLAGS) $(LDFLAGS)
 
 mylib_name = 	mylib.a
 
-mylib_srcs = 	SharedVariable.cpp \
-		BlockingChannel.cpp
+mylib_srcs = 	
+#		SharedVariable.cpp \
+#		BlockingChannel.cpp
 #		util.cpp \
 #               Channel.cpp
 #		BlockingQueue.h
 #		Component.cpp \
 
-mylib_objs = 	SharedVariable.o \
-		BlockingChannel.o
+mylib_objs = 	
+#		SharedVariable.o \
+#		BlockingChannel.o
 #		util.o \
 #		Channel.o 
 #		Component.o \

@@ -16,8 +16,6 @@ class Source2: public Component
 Source2::Source2(std::string _name): Component(_name)
 {
   addOutPort<int>("out");
-  //addChannel<int>("out");
-  //addSharedVariable("sharedcount");
 }
 
 void* Source2::task(void* nullarg)
@@ -30,22 +28,8 @@ void* Source2::task(void* nullarg)
     {
       this->outPort<int>("out")->write( data[i] );
       std::cout << this->name << " wrote "  << data[i] << std::endl;
-
-
-
-
-      /* IntToken* it = new IntToken(data[i]); */
-      /* // write out data */
-      /* //      channels["out"]->write(&data[i]); */
-      /* channels["out"]->write(it); */
-      /* std::cout << this->name << " wrote "  << it->getData() << std::endl; */
-      /* //channels["sharedcount"]->write( channels["sharedcount"]->read()+1 ); */
-
-      /* //s1a.write(data[i]); */
-      /* //printf("%s : step %d \n", thread_name, i); */
     }
   
-  //printf("Finished: %s \n", thread_name);
   return NULL;
 }
 

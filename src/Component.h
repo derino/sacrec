@@ -7,11 +7,8 @@
 #include <map>
 #include "boost/any.hpp"
 #include "Channel.h"
-#include "SharedVariable.h"
-#include "Token.h"
 #include "InPort.h"
 #include "OutPort.h"
-//class Channel;
 
 namespace sacre
 {
@@ -21,7 +18,6 @@ namespace sacre
   public:
     Component(std::string);
     ~Component();
-    std::map<std::string, Channel<Token*>*> channels;
     std::map<std::string, boost::any> inPorts;
     std::map<std::string, boost::any> outPorts;
 
@@ -30,8 +26,7 @@ namespace sacre
     // there were times that Component.task() was called 
     // instead of DerivedComponent.task()
     virtual void* task(void*) = 0;
-    //template <typename T>
-    Channel<Token*>*& operator[] (std::string);
+    //Channel<Token*>*& operator[] (std::string);
     template <typename T>
       InPort<T>* inPort(std::string);
     template <typename T>
@@ -40,13 +35,10 @@ namespace sacre
   protected:
     std::string name;
     template <typename T>
-    void addChannel(std::string);
-    template <typename T>
       void addInPort(std::string);
     template <typename T>
       void addOutPort(std::string);
-    //void addSharedVariable(std::string);
-    
+        
   private:
     pthread_t thread;
     // return value of pthread_create
@@ -70,7 +62,7 @@ namespace sacre
 	}
     }
 
-  //  template <typename T = Token>
+  /*
   Channel<Token*>*& Component::operator[] (std::string chanName)
     {
       if(channels.count(chanName) == 0)
@@ -81,7 +73,7 @@ namespace sacre
 
       return channels[chanName];
     }
-  
+*/  
   
   template <typename T>
     InPort<T>* Component::inPort( std::string portName)
@@ -114,15 +106,6 @@ namespace sacre
     }
 
   template <typename T>
-    void Component::addChannel(std::string chanName)
-    {
-      //ChannelName<T> cn(chanName);
-      //channels[cn] = NULL;
-      // NULL -> not connected
-      channels[chanName] = NULL;
-    }
-
-  template <typename T>
     void Component::addInPort(std::string portName)
     {
       // TODO: check if a port with portName already exists.
@@ -137,13 +120,6 @@ namespace sacre
       OutPort<T>* op = new OutPort<T>(portName);
       outPorts[portName] = op;
     }
-
-  /*
-  void Component::addSharedVariable(std::string sharedVarName)
-  {
-    addChannel<int>(sharedVarName);
-  }
-  */
 
   void Component::start(void)
   {
@@ -161,18 +137,6 @@ namespace sacre
     c->task( (void*) NULL);
     return NULL;
   }
-
-  /*template <typename T>
-class ChannelName
-  {
-  public:
-    ChannelName(std::string chanName)
-      {
-	name = chanName;
-      }
-  std:string name;
-  };*/
-
 
 }
 #endif

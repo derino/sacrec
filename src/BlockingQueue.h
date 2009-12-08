@@ -67,7 +67,7 @@ namespace sacre
 	*result = backing.front();
 	backing.pop();
 	this->size -= 1;
-	std::cout << "Channel " << this->getName() << "is read" << std::endl;
+	std::cout << "Channel " << this->getName() << " is read." << std::endl;
 	pthread_mutex_unlock(&lock);
 	return 0;
       }

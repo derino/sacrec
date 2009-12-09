@@ -100,13 +100,25 @@ namespace sacre
     {
       try
 	{
-	  InPort<T>* ip =  boost::any_cast< InPort<T>* >(inPorts[portName]);
-	  return ip;
+	  std::map<std::string,boost::any>::iterator it;
+	  it = inPorts.find(portName);
+	  if( it == inPorts.end() )
+	    {
+	      LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			    "Tried to use non-existent port! " << this->name << " doesn't have an input port named " << portName
+			    );
+	      exit(EXIT_FAILURE);
+	    }
+	  else
+	    {
+	      InPort<T>* ip =  boost::any_cast< InPort<T>* >(inPorts[portName]);
+	      return ip;
+	    }
 	}
       catch(boost::bad_any_cast&)
 	{
 	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
-			"FATAL ERROR: Tried to use the port with a different token type than its supported type!\n"
+			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
 			);
 	  exit(EXIT_FAILURE);
 	}
@@ -118,13 +130,25 @@ namespace sacre
     {
       try
 	{
-	  OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
-	  return op;
+	  std::map<std::string,boost::any>::iterator it;
+	  it = outPorts.find(portName);
+	  if( it == outPorts.end() )
+	    {
+	      LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			    "Tried to use non-existent port! " << this->name << " doesn't have an output port named " << portName
+			    );
+	      exit(EXIT_FAILURE);
+	    }
+	  else
+	    {
+	      OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
+	      return op;
+	    }
 	}
       catch(boost::bad_any_cast&)
 	{
 	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
-			"FATAL ERROR: Tried to use the port with a different token type than its supported type!\n"
+			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
 			);
 	  exit(EXIT_FAILURE);
 	}

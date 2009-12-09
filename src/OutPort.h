@@ -1,6 +1,9 @@
 #ifndef _OUTPORT_H_
 #define _OUTPORT_H_
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include "Port.h"
 #include "BlockingQueue.h"
 

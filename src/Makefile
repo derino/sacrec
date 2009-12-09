@@ -1,6 +1,6 @@
 
 # define a list of pkg-config packages we want to use
-pkg_packages := 
+pkg_packages := liblog4cxx
 
 # get the necessary flags for compiling
 PKG_CFLAGS := $(shell pkg-config --cflags $(pkg_packages))

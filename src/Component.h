@@ -1,6 +1,9 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -9,6 +12,7 @@
 #include "Channel.h"
 #include "InPort.h"
 #include "OutPort.h"
+
 
 namespace sacre
 {
@@ -55,6 +59,10 @@ namespace sacre
 
   Component::~Component()
     {
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    "Component" << name << " is destructed."
+		    );
+    
       // IMPORTANT NOTE:
       // below join doesn't do what we intend to achieve. It is sometimes the case that
       // DerivedComponent's destructor is called before its thread finishes and before 
@@ -97,7 +105,10 @@ namespace sacre
 	}
       catch(boost::bad_any_cast&)
 	{
-	  std::cout << "FATAL ERROR: Tried to use the port with a different token type than its supported type!\n";
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"FATAL ERROR: Tried to use the port with a different token type than its supported type!\n"
+			);
+	  exit(EXIT_FAILURE);
 	}
       return NULL;
     }
@@ -112,7 +123,10 @@ namespace sacre
 	}
       catch(boost::bad_any_cast&)
 	{
-	  std::cout << "FATAL ERROR: Tried to use the port with a different token type than its supported type!\n";
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"FATAL ERROR: Tried to use the port with a different token type than its supported type!\n"
+			);
+	  exit(EXIT_FAILURE);
 	}
       return NULL;
     }
@@ -123,6 +137,7 @@ namespace sacre
       // TODO: check if a port with portName already exists.
       InPort<T>* ip = new InPort<T>(portName);
       inPorts[portName] = ip;
+      ip->setComponent(this);
     }
   
   template <typename T>
@@ -131,6 +146,7 @@ namespace sacre
       // TODO: check if a port with portName already exists.
       OutPort<T>* op = new OutPort<T>(portName);
       outPorts[portName] = op;
+      op->setComponent(this);
     }
 
   void Component::start(void)

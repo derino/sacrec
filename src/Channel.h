@@ -1,6 +1,9 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <string>
 
 namespace sacre 

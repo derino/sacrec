@@ -1,6 +1,9 @@
 #ifndef _INPORT_H_
 #define _INPORT_H_
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include "Port.h"
 #include "BlockingQueue.h"
 

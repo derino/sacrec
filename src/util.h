@@ -1,7 +1,11 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <typeinfo>
+#include <sstream>
 #include "Component.h"
 #include "Channel.h"
 #include "BlockingQueue.h"
@@ -24,12 +28,18 @@ namespace sacre
 static int i = 0;
 
 template <typename T>
-bool connect(OutPort<T>* ip, InPort<T>* op)
+bool connect(OutPort<T>* op, InPort<T>* ip)
 {
   // TODO: check if argument ports are already connected. return false if so. (warn and exit)
-  BlockingQueue<T>* ch = new BlockingQueue<T>("BlockingQueue" + (++i));
+  std::stringstream i_str;
+  i_str << ++i;
+  BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str() );
   ip->setChannel(ch);
   op->setChannel(ch);
+
+  LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		"connected: " << op->getFullName() << " >-----" << ch->getName() <<  "-----> " << ip->getFullName()
+		);
   return true;
 }
 
@@ -47,7 +57,9 @@ void dump(std::map<std::string, boost::any> const& m)
       ++it)
     {
       InPort<T>* ip = boost::any_cast< InPort<T>* >(it->second);
-      std::cout << '[' << it->first << "] = " << ip->getChannel()->getName() << " ";// << (it->second)->getData() << '\n';
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    '[' << it->first << "] = " << ip->getChannel()->getName() << " "
+		    );
     }
 }
 

@@ -1,6 +1,9 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <pthread.h>
 #include "Component.h"
 
@@ -21,19 +24,24 @@ Display::Display(std::string _name): Component(_name)
 
 Display::~Display()
 {
-  //  std::cout << "Display is destructed." << std::endl;
+  LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		this->name << " is destructed."
+		);
 }
 
 void* Display::task(void* nullarg)
 {
-  std::cout << "Display's implementation of task thread." << std::endl;
-
+  LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		this->name << "'s implementation of task thread."
+		);
   int i;
   for(i=0; i<5; i++)
     {
       // read data from input and print
       int res = this->inPort<int>("in")->read();
-      std::cout << this->name << " read "  << res << std::endl;
+      LOG4CXX_TRACE(Logger::getLogger("application"), 
+		    this->name << " read "  << res
+		    );
     }
 
   return NULL;

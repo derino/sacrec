@@ -1,3 +1,9 @@
+// include log4cxx header files.
+#include "log4cxx/logger.h"
+#include "log4cxx/propertyconfigurator.h"
+#include "log4cxx/helpers/exception.h"
+using namespace log4cxx;
+
 #include <iostream>
 #include <pthread.h>
 
@@ -11,6 +17,11 @@ using namespace sacre;
 
 int main ()
 {
+  // Set up a simple configuration that logs on the console.
+  PropertyConfigurator::configure("log4cxx.properties");
+ 
+ 
+
   Source1 s1("Source 1");
   Source2 s2("Source 2");
   Adder a("Adder");
@@ -22,7 +33,6 @@ int main ()
 
   //dump<int>(a.inPorts);
 
-  std::cout << "starting" << std::endl;
   s1.start();
   s2.start();
   a.start();
@@ -30,16 +40,25 @@ int main ()
 
 
   if( pthread_join( s1.getThread(), NULL) == 0 )
-    std::cout << "Component " << s1.getName() << "'s thread finished succesfully." << std::endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		  "Component " << s1.getName() << "'s thread finished succesfully."
+		  );
 
   if( pthread_join( s2.getThread(), NULL) == 0 )
-    std::cout << "Component " << s2.getName() << "'s thread finished succesfully." << std::endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		  "Component " << s2.getName() << "'s thread finished succesfully."
+		  );
 
   if( pthread_join( a.getThread(), NULL) == 0 )
-    std::cout << "Component " << a.getName() << "'s thread finished succesfully." << std::endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		  "Component " << a.getName() << "'s thread finished succesfully."
+		  );
 
   if( pthread_join( d.getThread(), NULL) == 0 )
-    std::cout << "Component " << d.getName() << "'s thread finished succesfully." << std::endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"), 
+		  "Component " << d.getName() << "'s thread finished succesfully."
+		  );
+
 
   
   // Pipeline p = new Pipeline();

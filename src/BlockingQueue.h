@@ -5,6 +5,9 @@
 #ifndef __BLOCKINGQUEUE_H__
 #define __BLOCKINGQUEUE_H__
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
@@ -54,6 +57,10 @@ namespace sacre
       this->backing.push(element);
       this->size += 1;
       
+      LOG4CXX_TRACE(Logger::getLogger("sacrec"), 
+		    "Channel " << this->getName() << " is written." 
+		    );
+
       pthread_mutex_unlock(&lock);
       pthread_cond_signal(&non_empty);
     }
@@ -63,14 +70,18 @@ namespace sacre
       pthread_mutex_lock(&lock);
       
       /* If we have a non-empty queue... */
-      if (this->size > 0) {
-	*result = backing.front();
-	backing.pop();
-	this->size -= 1;
-	std::cout << "Channel " << this->getName() << " is read." << std::endl;
-	pthread_mutex_unlock(&lock);
-	return 0;
-      }
+      if (this->size > 0) 
+	{
+	  *result = backing.front();
+	  backing.pop();
+	  this->size -= 1;	  
+	  LOG4CXX_TRACE(Logger::getLogger("sacrec"), 
+			"Channel " << this->getName() << " is read." 
+			);
+	  pthread_mutex_unlock(&lock);
+
+	  return 0;
+	}
       
       /* Are we waiting for a specific amount of time? */
       if (this->micro_wait_time) {
@@ -99,6 +110,9 @@ namespace sacre
 	*result = backing.front();
 	backing.pop();
 	this->size -= 1;
+	LOG4CXX_TRACE(Logger::getLogger("sacrec"), 
+		      "Channel " << this->getName() << " is read." 
+		      );
 	pthread_mutex_unlock(&lock);
 	return 0;
       }
@@ -111,10 +125,14 @@ namespace sacre
       *result = backing.front();
       backing.pop();
       this->size -= 1;
+      LOG4CXX_TRACE(Logger::getLogger("sacrec"), 
+		    "Channel " << this->getName() << " is read." 
+		    );
       pthread_mutex_unlock(&lock);
       return 0;
     }
   };
+
 }
 
 #endif  /* __BLOCKING_QUEUE_H__ */

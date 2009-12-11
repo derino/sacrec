@@ -1,6 +1,10 @@
 #ifndef INTTOKEN_H
 #define INTTOKEN_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
+
 #include "Token.h"
 
 namespace sacre

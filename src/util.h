@@ -1,47 +1,68 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <typeinfo>
+#include <sstream>
 #include "Component.h"
 #include "Channel.h"
-#include "BlockingChannel.h"
 #include "BlockingQueue.h"
-#include "SharedVariable.h"
+#include "InPort.h"
+#include "OutPort.h"
 
 namespace sacre
 {
   
   // FIXME: why bool!?
   template <typename T>
-  bool connect(Channel<T>*&, Channel<T>*&);
+    bool connect(OutPort<T>*, InPort<T>*);
 
   template <typename T>
-  bool connect(Channel<T>*&, SharedVariable<T>* sharedVariable);
+    bool connect(InPort<T>*, OutPort<T>*);
+
+  template <typename T>
+    void dump(std::map<std::string, boost::any> const& m);
 
 static int i = 0;
 
 template <typename T>
-bool connect(Channel<T>*& ch1, Channel<T>*& ch2)
+bool connect(OutPort<T>* op, InPort<T>* ip)
 {
-  //  ch1 = dynamic_cast<Channel*>(new BlockingChannel("BlockingChannel" + (++i) ) );
+  // TODO: check if argument ports are already connected. return false if so. (warn and exit)
+  std::stringstream i_str;
+  i_str << ++i;
+  BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str() );
+  ip->setChannel(ch);
+  op->setChannel(ch);
 
-  //  ch1 = new BlockingChannel("BlockingChannel" + (++i) );
-  //  ch2 = ch1;
-  std::cout << typeid(T).name() << std::endl;
-  ch1 = new BlockingQueue<T>("BlockingQueue" + (++i));
-  ch2 = ch1;
+  LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		"connected: " << op->getFullName() << " >-----" << ch->getName() <<  "-----> " << ip->getFullName()
+		);
   return true;
 }
 
 template <typename T>
-bool connect(Channel<T>*& sv, SharedVariable<T>* sharedVariable)
+bool connect(InPort<T>* ip, OutPort<T>* op)
 {
-  //  sv = dynamic_cast<Channel*>(sharedVariable);
-  sv = sharedVariable;
-
-  return true;
+  return connect(op, ip);
+}
+ 
+template <typename T>
+void dump(std::map<std::string, boost::any> const& m)
+{
+  for(typename std::map<std::string, boost::any>::const_iterator it(m.begin()), j(m.end()); 
+      it != j; 
+      ++it)
+    {
+      InPort<T>* ip = boost::any_cast< InPort<T>* >(it->second);
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    '[' << it->first << "] = " << ip->getChannel()->getName() << " "
+		    );
+    }
 }
 
-  
+ 
 }
 #endif

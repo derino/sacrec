@@ -1,0 +1,28 @@
+sacrec TODO:
+
+9 December 2009
+----------------------------------
+
++ ->fullName added is added in Port.h
++ ->log4cxx
++ ->Add destructor to derived components
+
+Tests:
++ ->use connect method in main without giving type parameters
++ ->test connect method with different types of port connected together and other illegal cases
++ ->different type of ports can not be connected to the same channel
++ ->order of  port arguments (in,out)  (out,in) should work properly
+    ->check pointers as tokens
+
+TODO:
+->define pipeline classes (add run() method )
+->stop token
+->unit test library
+->generic components (Adder<int> a template)  only valid for all ports being of the same token type
+
+erkan:
+->Check dotty for showing schema
+->use Valgrind to check leakage
+
+10 December 2009
+---------------------------------------

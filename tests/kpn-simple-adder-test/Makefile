@@ -10,7 +10,7 @@ ADD_CFLAGS := -Wall -g -I$(mylib_inc)
 ADD_LDFLAGS := -lpthread $(mylib_a)
 
 # define a list of pkg-config packages we want to use
-pkg_packages := 
+pkg_packages := liblog4cxx
 
 # get the necessary flags for compiling
 PKG_CFLAGS := $(shell pkg-config --cflags $(pkg_packages))
@@ -26,13 +26,13 @@ LDFLAGS := $(PKG_LDFLAGS) $(ADD_LDFLAGS) $(LDFLAGS)
 .SUFFIXES:
 .SUFFIXES: .o .cpp
 
-targets = sharedvariable-test
+targets = kpn-simple-adder-test
 
 .PHONY: all
 
 all: $(targets)
 
-sharedvariable-test: sharedvariable-test.o #Source2.o Adder.o Display.o Source1.o
+kpn-simple-adder-test: main.o #Source2.o Adder.o Display.o Source1.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 .cpp.o:

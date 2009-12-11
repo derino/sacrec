@@ -1,14 +1,18 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "log4cxx/logger.h"
+using namespace log4cxx;
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
 #include <map>
+#include "boost/any.hpp"
 #include "Channel.h"
-#include "SharedVariable.h"
-#include "Token.h"
-//class Channel;
+#include "InPort.h"
+#include "OutPort.h"
+
 
 namespace sacre
 {
@@ -18,22 +22,29 @@ namespace sacre
   public:
     Component(std::string);
     ~Component();
-    std::map<std::string, Channel<Token*>*> channels;
+    std::map<std::string, boost::any> inPorts;
+    std::map<std::string, boost::any> outPorts;
+
     void start(void);
+    pthread_t getThread();
     // if task is not pure virtual, I get strange behaviour at run-time.
     // there were times that Component.task() was called 
     // instead of DerivedComponent.task()
     virtual void* task(void*) = 0;
-    //template <typename T>
-    Channel<Token*>*& operator[] (std::string);
-    
+    //Channel<Token*>*& operator[] (std::string);
+    template <typename T>
+      InPort<T>* inPort(std::string);
+    template <typename T>
+      OutPort<T>* outPort(std::string);
+    std::string getName();
+
   protected:
     std::string name;
     template <typename T>
-    void addChannel(std::string);
-    void addSharedVariable(std::string);
-    
-  private:
+      void addInPort(std::string);
+    template <typename T>
+      void addOutPort(std::string);
+
     pthread_t thread;
     // return value of pthread_create
     int iret;
@@ -48,15 +59,30 @@ namespace sacre
 
   Component::~Component()
     {
-      // if the component gets out of scope, wait until thread finishes before destruction
-      if(thread != 0)
-	{
-	  pthread_join(thread, NULL);
-	  std::cout << "Component " << name << "'s pthread_create returned " << iret << std::endl;
-	}
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    "Component" << name << " is destructed."
+		    );
+    
+      // IMPORTANT NOTE:
+      // below join doesn't do what we intend to achieve. It is sometimes the case that
+      // DerivedComponent's destructor is called before its thread finishes and before 
+      // Component's destructor is called. In this case we get a 
+      // "pure virtual method called / terminate called without an active exception"
+      // error with an ABORT. 
+      // (see: http://tombarta.wordpress.com/2008/07/10/gcc-pure-virtual-method-called/)
+      // Solution for now is to move the below join to the end of main thread (e.g. main.cpp).
+      // OR move below join to the destructor of each deriving component.
+      
+      
+      /* // if the component gets out of scope, wait until thread finishes before destruction */
+      /* if(thread != 0) */
+      /* 	{ */
+      /* 	  pthread_join(thread, NULL); */
+      /* 	  std::cout << "Component " << name << "'s pthread_create returned " << iret << std::endl; */
+      /* 	} */
     }
 
-  //template <typename T = Token>
+  /*
   Channel<Token*>*& Component::operator[] (std::string chanName)
     {
       if(channels.count(chanName) == 0)
@@ -67,24 +93,95 @@ namespace sacre
 
       return channels[chanName];
     }
-
+*/  
+  
   template <typename T>
-    void Component::addChannel(std::string chanName)
+    InPort<T>* Component::inPort( std::string portName)
     {
-      //ChannelName<T> cn(chanName);
-      //channels[cn] = NULL;
-      // NULL -> not connected
-      channels[chanName] = NULL;
+      try
+	{
+	  std::map<std::string,boost::any>::iterator it;
+	  it = inPorts.find(portName);
+	  if( it == inPorts.end() )
+	    {
+	      LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			    "Tried to use non-existent port! " << this->name << " doesn't have an input port named " << portName
+			    );
+	      exit(EXIT_FAILURE);
+	    }
+	  else
+	    {
+	      InPort<T>* ip =  boost::any_cast< InPort<T>* >(inPorts[portName]);
+	      return ip;
+	    }
+	}
+      catch(boost::bad_any_cast&)
+	{
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
+			);
+	  exit(EXIT_FAILURE);
+	}
+      return NULL;
     }
 
-  void Component::addSharedVariable(std::string sharedVarName)
-  {
-    addChannel<int>(sharedVarName);
-  }
+  template <typename T>
+    OutPort<T>* Component::outPort( std::string portName)
+    {
+      try
+	{
+	  std::map<std::string,boost::any>::iterator it;
+	  it = outPorts.find(portName);
+	  if( it == outPorts.end() )
+	    {
+	      LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			    "Tried to use non-existent port! " << this->name << " doesn't have an output port named " << portName
+			    );
+	      exit(EXIT_FAILURE);
+	    }
+	  else
+	    {
+	      OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
+	      return op;
+	    }
+	}
+      catch(boost::bad_any_cast&)
+	{
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
+			);
+	  exit(EXIT_FAILURE);
+	}
+      return NULL;
+    }
+
+  template <typename T>
+    void Component::addInPort(std::string portName)
+    {
+      // TODO: check if a port with portName already exists.
+      InPort<T>* ip = new InPort<T>(portName);
+      inPorts[portName] = ip;
+      ip->setComponent(this);
+    }
+  
+  template <typename T>
+    void Component::addOutPort(std::string portName)
+    {
+      // TODO: check if a port with portName already exists.
+      OutPort<T>* op = new OutPort<T>(portName);
+      outPorts[portName] = op;
+      op->setComponent(this);
+    }
 
   void Component::start(void)
   {
+    // TODO: what to do with iret? Do we really need it?
     iret = pthread_create( &thread, NULL, task_cwrapper, (void*)this);
+  }
+
+  pthread_t Component::getThread()
+  {
+    return thread;
   }
 
   /*void* Component::task(void*)
@@ -99,17 +196,10 @@ namespace sacre
     return NULL;
   }
 
-  /*template <typename T>
-class ChannelName
-  {
-  public:
-    ChannelName(std::string chanName)
-      {
-	name = chanName;
-      }
-  std:string name;
-  };*/
-
+  std::string Component::getName()
+    {
+      return name;
+    }
 
 }
 #endif

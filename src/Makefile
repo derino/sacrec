@@ -1,6 +1,6 @@
 
 # define a list of pkg-config packages we want to use
-pkg_packages := 
+pkg_packages := liblog4cxx
 
 # get the necessary flags for compiling
 PKG_CFLAGS := $(shell pkg-config --cflags $(pkg_packages))
@@ -22,15 +22,17 @@ LDFLAGS := $(PKG_LDFLAGS) $(ADD_LDFLAGS) $(LDFLAGS)
 
 mylib_name = 	mylib.a
 
-mylib_srcs = 	SharedVariable.cpp \
-		BlockingChannel.cpp
+mylib_srcs = 	
+#		SharedVariable.cpp \
+#		BlockingChannel.cpp
 #		util.cpp \
 #               Channel.cpp
 #		BlockingQueue.h
 #		Component.cpp \
 
-mylib_objs = 	SharedVariable.o \
-		BlockingChannel.o
+mylib_objs = 	
+#		SharedVariable.o \
+#		BlockingChannel.o
 #		util.o \
 #		Channel.o 
 #		Component.o \

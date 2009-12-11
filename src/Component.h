@@ -40,6 +40,7 @@ namespace sacre
 
   protected:
     std::string name;
+    bool isComposite;
     template <typename T>
       void addInPort(std::string);
     template <typename T>
@@ -52,7 +53,7 @@ namespace sacre
   
   extern "C" void* task_cwrapper(void*);
   
-  Component::Component(std::string _name): name(_name), thread(0), iret(0)
+  Component::Component(std::string _name): name(_name), isComposite(false), thread(0), iret(0)
     {
 
     }
@@ -158,6 +159,14 @@ namespace sacre
   template <typename T>
     void Component::addInPort(std::string portName)
     {
+      if(isComposite)
+	{
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"addInPort(std::string) can not be used for composite components. Use addInPort(std::string, InPort<T>*) instead."
+			);
+	  exit(EXIT_FAILURE);
+	}
+      
       // TODO: check if a port with portName already exists.
       InPort<T>* ip = new InPort<T>(portName);
       inPorts[portName] = ip;
@@ -167,6 +176,14 @@ namespace sacre
   template <typename T>
     void Component::addOutPort(std::string portName)
     {
+      if(isComposite)
+	{
+	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+			"addOutPort(std::string) can not be used for composite components. Use addOutPort(std::string, OutPort<T>*) instead."
+			);
+	  exit(EXIT_FAILURE);
+	}
+      
       // TODO: check if a port with portName already exists.
       OutPort<T>* op = new OutPort<T>(portName);
       outPorts[portName] = op;

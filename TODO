@@ -15,14 +15,18 @@ Tests:
     ->check pointers as tokens
 
 TODO:
-->define pipeline classes (add run() method )
++->define pipeline classes (add run() method )
 ->stop token
 ->unit test library
 ->generic components (Adder<int> a template)  only valid for all ports being of the same token type
 
 erkan:
 ->Check dotty for showing schema
-->use Valgrind to check leakage
+->use (Valgrind,NPTL trace tool) to check leakage
 
-10 December 2009
+11 December 2009
 ---------------------------------------
+Composite is not an abstract class,but its inst. does not make sense.
+User who wants to create a composite component should derive from
+composite and create the assembly in its constructor.
+

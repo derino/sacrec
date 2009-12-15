@@ -12,7 +12,7 @@ using namespace log4cxx;
 #include "Channel.h"
 #include "InPort.h"
 #include "OutPort.h"
-
+//#include "IterableOutPort.h"
 
 namespace sacre
 {
@@ -31,6 +31,7 @@ namespace sacre
     // there were times that Component.task() was called 
     // instead of DerivedComponent.task()
     virtual void* task(void*) = 0;
+    void* run();
     //Channel<Token*>*& operator[] (std::string);
     template <typename T>
       InPort<T>* inPort(std::string);
@@ -45,6 +46,7 @@ namespace sacre
       void addInPort(std::string);
     template <typename T>
       void addOutPort(std::string);
+    void writeAllOutPortsStopToken();
 
     pthread_t thread;
     // return value of pthread_create
@@ -112,7 +114,15 @@ namespace sacre
 	    }
 	  else
 	    {
-	      InPort<T>* ip =  boost::any_cast< InPort<T>* >(inPorts[portName]);
+	      IterableInPort* iip =  boost::any_cast< IterableInPort* >(inPorts[portName]);
+	      InPort<T>* ip =  dynamic_cast< InPort<T>* >(iip);
+	      if(ip == NULL)
+		{
+		  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+				"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
+				);
+		  exit(EXIT_FAILURE);
+		}
 	      return ip;
 	    }
 	}
@@ -142,8 +152,18 @@ namespace sacre
 	    }
 	  else
 	    {
-	      OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
+	      IterableOutPort* iop =  boost::any_cast< IterableOutPort* >(outPorts[portName]);
+	      OutPort<T>* op =  dynamic_cast< OutPort<T>* >(iop);
+	      if(op == NULL)
+		{
+		  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
+				"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
+				);
+		  exit(EXIT_FAILURE);
+		}
 	      return op;
+	      //OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
+	      //return op;
 	    }
 	}
       catch(boost::bad_any_cast&)
@@ -169,8 +189,10 @@ namespace sacre
       
       // TODO: check if a port with portName already exists.
       InPort<T>* ip = new InPort<T>(portName);
-      inPorts[portName] = ip;
       ip->setComponent(this);
+      //IterableInPort* iip = (IterableInPort*) ip;
+      IterableInPort* iip = dynamic_cast<IterableInPort*>(ip);
+      inPorts[portName] = iip;
     }
   
   template <typename T>
@@ -186,8 +208,10 @@ namespace sacre
       
       // TODO: check if a port with portName already exists.
       OutPort<T>* op = new OutPort<T>(portName);
-      outPorts[portName] = op;
       op->setComponent(this);
+      IterableOutPort* iop = dynamic_cast<IterableOutPort*>(op);
+      outPorts[portName] = iop;
+      //outPorts[portName] = op;
     }
 
   void Component::start(void)
@@ -206,10 +230,39 @@ namespace sacre
     std::cout << "default component task function does nothing. Extend Component and override task method." << std::endl;
     }*/
 
+  void* Component::run()
+  {
+    bool isSourceAndNotComposite = false;
+    if(inPorts.size() == 0 && !isComposite)
+      isSourceAndNotComposite = true;
+
+    //    while(1)
+    //  {
+	try
+	  {
+	    task( (void*)NULL );
+	    if(isSourceAndNotComposite)
+	      {
+		writeAllOutPortsStopToken();
+	      }
+	  }
+	catch(StopTokenException& ste)
+	  {
+	    LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+			  this->getName() << " received STOP_TOKEN"
+			  );
+	    
+	    // if this exception is received, then it means it is from the critical channel (the one that reads the unknown number of tokens), therefore we can write STOP_TOKEN to each outport and stop the thread by returning NULL.
+	    writeAllOutPortsStopToken();
+	  }
+	//} //end while
+	return NULL;
+  }
+
   extern "C" void* task_cwrapper(void* arg)
   {
     Component* c = static_cast<Component*>(arg);
-    c->task( (void*) NULL);
+    c->run();
     return NULL;
   }
 
@@ -217,6 +270,20 @@ namespace sacre
     {
       return name;
     }
+
+  void Component::writeAllOutPortsStopToken()
+  {
+    // write all outports STOP_TOKEN
+    for( std::map<std::string, boost::any>::iterator i = outPorts.begin(); i != outPorts.end(); ++i )
+      {
+	IterableOutPort* iop = boost::any_cast<IterableOutPort*>(i->second);
+	iop->writeStopToken();
+	LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		      this->getName() << " wrote STOP_TOKEN"
+		      );
+      }
+  }
+  
 
 }
 #endif

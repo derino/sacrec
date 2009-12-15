@@ -5,17 +5,20 @@
 using namespace log4cxx;
 
 #include "Port.h"
+#include "IterableInPort.h"
 #include "BlockingQueue.h"
+#include "StopTokenException.h"
 
 namespace sacre
 {
 
   template <typename T>
-    class InPort : public Port<T>
+    class InPort : public Port<T>, public IterableInPort
     {
     public:
       InPort(std::string _name);
       T read();
+      virtual void disconnect();
     };
   
   template <typename T>
@@ -28,8 +31,26 @@ namespace sacre
     {
       T* t = new T();
       this->channel->read(t);
+
+      // acts as hook to stop STOP_TOKEN
+      // TODO: this can be moved to a hook when we add the hook concept.
+      if( t->isStop() )
+	{
+	  LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+			this->getFullName() << " received STOP_TOKEN"
+			);
+	  throw StopTokenException();
+	}
+
       return *t;
     };
+
+  template <typename T>
+    void InPort<T>::disconnect()
+    {
+      // TODO: not implemented yet. It's here just to make IterableInPort polymorphic.
+    }
+
 }
 
 #endif /* _INPORT_H_ */

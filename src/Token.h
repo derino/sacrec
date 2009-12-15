@@ -7,10 +7,55 @@ using namespace log4cxx;
 namespace sacre
 {
 
+  enum TokenType { STOP_TOKEN, DATA_TOKEN };
+  
+  template <typename T>
   class Token
   {
-    
+  public:
+    Token();
+    Token(T);
+    Token(TokenType);    
+    bool isStop();
+    T getData();
+
+  protected:
+    TokenType type;
+    T data;
   };
+
+  template <typename T>
+    Token<T>::Token()
+    {
+      type = DATA_TOKEN;
+      this->data = NULL;
+    }
+  
+  template <typename T>
+    Token<T>::Token(T data)
+    {
+      type = DATA_TOKEN;
+      this->data = data;
+    }
+  
+  template <typename T>
+    Token<T>::Token(TokenType type)
+    {
+      this->type = type;
+      data = NULL;
+    }
+
+  template <typename T>
+    bool Token<T>::isStop()
+    {
+      return type == STOP_TOKEN;
+    }
+
+  template <typename T>
+    T Token<T>::getData()
+    {
+      return data;
+    }
 
 }
 

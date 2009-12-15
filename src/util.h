@@ -34,6 +34,7 @@ bool connect(OutPort<T>* op, InPort<T>* ip)
   std::stringstream i_str;
   i_str << ++i;
   BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str() );
+  // TODO: if connect is called with wrong token type (e.g. int instead of Token<int>), op and ip may come as NULL. It needs to be checked.
   ip->setChannel(ch);
   op->setChannel(ch);
 

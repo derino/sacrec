@@ -12,7 +12,6 @@ using namespace log4cxx;
 #include "Component.h"
 
 
-
 namespace sacre
 {
   
@@ -55,14 +54,18 @@ namespace sacre
   template <typename T>
   void Composite::addInPort(std::string portName, InPort<T>* portToBeExported)
   {
-    inPorts[portName] = portToBeExported;
+    IterableInPort* iip = dynamic_cast<IterableInPort*>(portToBeExported);
+    inPorts[portName] = iip;
+    //    inPorts[portName] = portToBeExported;
   }
 
 
   template <typename T>
   void Composite::addOutPort(std::string portName, OutPort<T>* portToBeExported)
   {
-    outPorts[portName] = portToBeExported;
+    IterableOutPort* iop = dynamic_cast<IterableOutPort*>(portToBeExported);
+    outPorts[portName] = iop;
+    //outPorts[portName] = portToBeExported;
   }
 
 

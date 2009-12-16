@@ -31,8 +31,10 @@ Sink::Sink(string _name):Component(_name)
   addInPort< Token<int> >("inData");
 
   resultfile = new ofstream("result.pgm");
-  if (!resultfile->is_open()) 
-    cout << "Error opening file result.pgm " << endl; // << _outputfile << endl;
+  if (!resultfile->is_open())
+      LOG4CXX_WARN(Logger::getLogger("application"),
+		    this->name << ": Error opening file result.pgm"
+		    );
 }
 
 

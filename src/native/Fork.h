@@ -24,16 +24,12 @@ namespace sacre
     Fork<T, N>::Fork(std::string _name): Component(_name)
   {
     addInPort<T>("in");
-  for (int i = 0; i < N; ++i)
-    {
-      
-    }(int i=1; i<=N; i++)
-       {
-	 std::stringstream str;
-	 str << i;
-	 addOutPort<T>("out" + str.str());
-       }
-  //addOutPort< Token<int> >("out2");
+    for (int i=1; i<=N; i++)
+      {
+	std::stringstream str;
+	str << i;
+	addOutPort<T>("out" + str.str());
+      }
   }
   
   template <typename T, int N>

@@ -44,9 +44,13 @@ Source::Source(string _name) : Component(_name)
   //open file
   stimulusfile = new ifstream("mountain.pgm");
   if (!stimulusfile->is_open()) {
-    cout << "Error opening file mountain.pgm "<<endl;  // << _filename << endl;
+    LOG4CXX_WARN(Logger::getLogger("application"),
+		 this->name << ": Error opening file mountain.pgm"
+		 );
   } else {
-    cout << "Succesfull opened file mountain.pgm "<<endl; // << _filename << endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"),
+		 this->name << ": Successfully opened file mountain.pgm"
+		 );
   }
 
 }
@@ -74,14 +78,18 @@ void* Source::task(void* nullarg)
   // read in PGM identifier                                                                                                              
   *stimulusfile >> buffer;
   if (strcmp(buffer,"P2")) {
-    cout << "no greyscale PGM file" << endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"),
+                this->name << ": no greyscale PGM file"
+                );
     return NULL;
   }
   // does not support comment lines in image file!                                                                                       
   // read in and put out width and height                                                                                                
   *stimulusfile >> width;
   if (width > maxwidth) {
-    cout << "width of image " << width << " larger than maximum width " << maxwidth << endl;
+    LOG4CXX_DEBUG(Logger::getLogger("application"),
+		  this->name << ": width of image " << width << " larger than maximum width " << maxwidth
+		  );
     return NULL;
   }
   Token<int>* wt=new Token<int>(width);
@@ -96,14 +104,18 @@ void* Source::task(void* nullarg)
   Token<int>* vt=new Token<int>(value);
   this->outPort< Token<int> >("outParam")->write(*vt);
 
-  cout << "inputfile:: width: " << width<< " height: " << height<< " greyvalue: " << value << endl;
+  LOG4CXX_DEBUG(Logger::getLogger("application"),
+		this->name << ": inputfile:: width: " << width<< " height: " << height<< " greyvalue: " << value
+		);
 
   unsigned pixels = 0;
   while (pixels < width*height)
     {
       if (stimulusfile->eof())
 	{
-	  cout << "error file of wrong length" << endl;
+	  LOG4CXX_DEBUG(Logger::getLogger("application"),
+			this->name << ": error file of wrong length"
+			);
 	  break;
 	}
       pixels++;

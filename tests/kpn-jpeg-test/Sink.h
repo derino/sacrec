@@ -41,6 +41,7 @@ Sink::Sink(string _name):Component(_name)
 Sink::~Sink()
 {
   resultfile->close();
+  delete resultfile;
 }
 
 

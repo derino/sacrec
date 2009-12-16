@@ -25,7 +25,7 @@ class B2R: public Component
 
  private:
   int maxwidth;
-
+  int*	lines;
 };
 
 
@@ -37,7 +37,8 @@ B2R::B2R(string _name):Component(_name)
   
   //set maxwidth
   maxwidth=MAXWIDTH;
-  
+  int maxwidth8  = (maxwidth +7)/8 * 8;   // round up to multiples of 8
+  lines = new int[maxwidth8 * 8];	// we need 8 lines before outputting  
 }
 
 B2R::~B2R()
@@ -45,14 +46,15 @@ B2R::~B2R()
   LOG4CXX_DEBUG(Logger::getLogger("application"),
                 this->name << " is destructed."
                 );
+  delete [] lines;
 }
 
 void* B2R::task(void* nullarg)
 {
   
   int		row, col;
-  int		maxwidth8  = (maxwidth +7)/8 * 8;   // round up to multiples of 8
-  int *	lines = new int [maxwidth8 * 8];	// we need 8 lines before outputting
+
+
   int		count = 0;		   	// number of lines read in
   int		width, height, width8; 	       	// the actual width and height of the picture
   
@@ -74,8 +76,8 @@ void* B2R::task(void* nullarg)
     for (row=0; row<8; row++) {
       if (count < height) {
 	for (col = 0 ; col < width ; col++ ) {
-	  Token<int>* pvt=new Token<int>(lines [row * width8 + col]);
-	  this->outPort< Token<int> >("outData")->write(*pvt);
+	  Token<int> pvt(lines [row * width8 + col]);
+	  this->outPort< Token<int> >("outData")->write(pvt);
 	  //output.write(lines [row * width8 + col]);
 	}
       }
@@ -84,8 +86,9 @@ void* B2R::task(void* nullarg)
     if (count >= height) count = 0;
   }
 
-  return NULL;
-  
+  // this delete is not useful because task always exits with StopTokenException
+  delete [] lines;
+  return NULL;  
 }
 
 

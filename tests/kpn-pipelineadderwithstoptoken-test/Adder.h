@@ -54,8 +54,8 @@ void* Adder::task(void* nullarg)
 		    );
       
       int sum = t1.getData() + t2.getData();
-      Token<int>* tsum = new Token<int>(sum);
-      this->outPort< Token<int> >("out")->write( *tsum );
+      Token<int> tsum(sum);
+      this->outPort< Token<int> >("out")->write( tsum );
       LOG4CXX_TRACE(Logger::getLogger("application"), 
 		    this->name << " wrote "  << sum
 		    );

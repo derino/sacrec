@@ -95,8 +95,8 @@ void* IDCT::task(void* nullarg)
     // output
     for ( i = 0 ; i < 8 ; ++i ) {
       for ( j = 0 ; j < 8 ; ++j ){
-	Token<int>* pvt=new Token<int>(blocki[i*8+j]);
-	this->outPort< Token<int> >("outData")->write(*pvt);
+	Token<int> pvt(blocki[i*8+j]);
+	this->outPort< Token<int> >("outData")->write(pvt);
 	//	output.write(blocki[i*8+j]);
       }
     }

@@ -57,12 +57,12 @@ namespace sacre
 	  
 	  for(int i=1; i<=N; i++)
 	    {
-	      T* tOut = new T(tIn);
+	      T tOut(tIn);
 	      std::stringstream str;
 	      str << i;
-	      this->outPort<T>("out" + str.str())->write( *tOut );
+	      this->outPort<T>("out" + str.str())->write( tOut );
 	      LOG4CXX_TRACE(Logger::getLogger("sacrec"), 
-			    this->name << " wrote "  << tOut->getData()
+			    this->name << " wrote "  << tOut.getData()
 			    );
 	    }
 	}

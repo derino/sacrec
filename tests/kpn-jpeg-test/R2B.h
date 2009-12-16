@@ -25,7 +25,7 @@ class R2B: public Component
 
  private:
   int maxwidth;
-
+  int* lines;
 };
 
 R2B::R2B(string _name): Component(_name)
@@ -36,7 +36,8 @@ R2B::R2B(string _name): Component(_name)
   
   //set maxwidth
   maxwidth=MAXWIDTH;
-
+  int maxwidth8  = (maxwidth +7)/8 * 8;   // round up to multiples of 8
+  lines = new int[maxwidth8 * 8];	// we need 8 lines before outputting
 }
 
 R2B::~R2B()
@@ -44,15 +45,14 @@ R2B::~R2B()
   LOG4CXX_DEBUG(Logger::getLogger("application"),
                 this->name << " is destructed."
                 );
-  
+  delete [] lines;
 }
 
 void* R2B::task(void* nullarg)
 {
   int		in1;
   int		row, col;
-  int		maxwidth8  = (maxwidth +7)/8 * 8;   // round up to multiples of 8
-  int *		lines = new int [maxwidth8 * 8];	// we need 8 lines before outputting
+
   int		count = 0;			// number of lines read in
   int		width, height, width8;		// the actual width and height of the picture
   
@@ -83,14 +83,16 @@ void* R2B::task(void* nullarg)
     for ( col = 0 ; col < width8 ; col += 8 ) {
       for ( row = 0 ; row < 8 ; row++ ) {
 	for ( int k = 0 ; k < 8 ; k++ ) {
-	  Token<int>* pvt=new Token<int>(lines [ col + row * width8 + k ]);
-	  this->outPort< Token<int> >("outData")->write(*pvt);
+	  Token<int> pvt(lines [ col + row * width8 + k ]);
+	  this->outPort< Token<int> >("outData")->write(pvt);
 	  // output.write (lines [ col + row * width8 + k ]);
 	}
       }
     }
   }
-  
+
+  // this delete is not useful because task always exits with StopTokenException
+  delete [] lines;
   return NULL;
 }
 

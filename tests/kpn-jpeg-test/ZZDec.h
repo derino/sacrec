@@ -70,8 +70,8 @@ void* ZZDec::task(void* nullarg)
     
     for ( i = 0 ; i < 8 ; ++i ) {
       for ( j = 0 ; j < 8 ; ++j ) {
-	Token<int>* pvt=new Token<int>(block[i*8+j]);
-	this->outPort< Token<int> >("outData")->write(*pvt);
+	Token<int> pvt(block[i*8+j]);
+	this->outPort< Token<int> >("outData")->write(pvt);
 	//output.write(block[i*8+j]);
       }
     }

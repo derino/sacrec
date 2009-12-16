@@ -103,8 +103,8 @@ void* DCT::task(void* nullarg)
     // output
     for ( i = 0 ; i < 8 ; ++i ) {
       for ( j = 0 ; j < 8 ; ++j ){
-	Token<float>* pvt=new Token<float>(block[i*8+j]);
-	this->outPort< Token<float> >("outData")->write(*pvt);
+	Token<float> pvt(block[i*8+j]);
+	this->outPort< Token<float> >("outData")->write(pvt);
 	//	output.write(block[i*8+j]);
 	//				cout << block[i*8+j] << " ";
       }

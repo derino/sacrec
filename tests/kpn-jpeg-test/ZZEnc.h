@@ -82,8 +82,8 @@ void* ZZEnc::task(void* nullarg)
     block[k] = temp_block[i*8+j];
     
     for ( i = 0 ; i < 64 ; ++i ) {
-      Token<int>* pvt=new Token<int>(block[i]);
-      this->outPort< Token<int> >("outData")->write(*pvt);
+      Token<int> pvt(block[i]);
+      this->outPort< Token<int> >("outData")->write(pvt);
       //output.write (block[i]);
     }
   }

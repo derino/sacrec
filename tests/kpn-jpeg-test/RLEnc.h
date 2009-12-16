@@ -47,8 +47,8 @@ void* RLEnc::task(void* nullarg)
   
   while (1) {
     // read and write DC value
-    Token<int>* pvt=new Token<int>(this->inPort< Token<int> >("inData")->read().getData());
-    this->outPort< Token<int> >("outData")->write(*pvt);
+    Token<int> pvt(this->inPort< Token<int> >("inData")->read().getData());
+    this->outPort< Token<int> >("outData")->write(pvt);
     //output.write(input.read());
     
     count = 0;
@@ -59,17 +59,17 @@ void* RLEnc::task(void* nullarg)
 	count++;
       }
       else {
-	Token<int>* pvt1=new Token<int>(count);
-	this->outPort< Token<int> >("outData")->write(*pvt1);
+	Token<int> pvt1(count);
+	this->outPort< Token<int> >("outData")->write(pvt1);
 	//output.write(count);
 	count = 0;
-	Token<int>* pvt2=new Token<int>(value);
-	this->outPort< Token<int> >("outData")->write(*pvt2);
+	Token<int> pvt2(value);
+	this->outPort< Token<int> >("outData")->write(pvt2);
 	//output.write(value);
       }
     }
-    Token<int>* pvt3=new Token<int>(64);
-    this->outPort< Token<int> >("outData")->write(*pvt3);
+    Token<int> pvt3(64);
+    this->outPort< Token<int> >("outData")->write(pvt3);
     //output.write(64);
   }
 

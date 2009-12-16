@@ -17,7 +17,7 @@ namespace sacre
     {
     public:
       OutPort(std::string _name);
-      void write(T);
+      void write(T&);
       virtual void writeStopToken();
       virtual void disconnect();
     };
@@ -28,7 +28,7 @@ namespace sacre
     }
   
   template <typename T>
-    void OutPort<T>::write(T t)
+    void OutPort<T>::write(T& t)
     {
       this->channel->write(t);
     };
@@ -36,8 +36,8 @@ namespace sacre
   template <typename T>
     void OutPort<T>::writeStopToken()
     {
-      T* t = new T(STOP_TOKEN);
-      this->channel->write(*t);
+      T t(STOP_TOKEN);
+      this->channel->write(t);
       LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
 		    this->getFullName() << " wrote STOP_TOKEN"
 		    );

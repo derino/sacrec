@@ -46,8 +46,8 @@ void* RLDec::task(void* nullarg)
   
   while (1) {
     // read and write DC value
-    Token<int>* pvt=new Token<int>(this->inPort< Token<int> >("inData")->read().getData());
-    this->outPort< Token<int> >("outData")->write(*pvt);
+    Token<int> pvt(this->inPort< Token<int> >("inData")->read().getData());
+    this->outPort< Token<int> >("outData")->write(pvt);
     // output.write(input.read());
     // process AC values
     count = 1;
@@ -56,14 +56,14 @@ void* RLDec::task(void* nullarg)
     while (value != 64) {
       // process zl
       for ( ; value > 0 ; value-- ) {
-	Token<int>* pvt1=new Token<int>(0);
-	this->outPort< Token<int> >("outData")->write(*pvt1);
+	Token<int> pvt1(0);
+	this->outPort< Token<int> >("outData")->write(pvt1);
 	//output.write(0);
 	count++;
       }
       // read and process non-zero value
-      Token<int>* pvt2=new Token<int>(this->inPort< Token<int> >("inData")->read().getData());
-      this->outPort< Token<int> >("outData")->write(*pvt2);
+      Token<int> pvt2(this->inPort< Token<int> >("inData")->read().getData());
+      this->outPort< Token<int> >("outData")->write(pvt2);
       // output.write(input.read());
       count ++;
       // read zero length value
@@ -71,8 +71,8 @@ void* RLDec::task(void* nullarg)
     }
     // process zero length of 64
     for ( ; count<64 ; ) {
-      Token<int>* pvt3=new Token<int>(0);
-      this->outPort< Token<int> >("outData")->write(*pvt3);
+      Token<int> pvt3(0);
+      this->outPort< Token<int> >("outData")->write(pvt3);
       //output.write(0);
       count++;
     }

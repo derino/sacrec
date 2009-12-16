@@ -65,8 +65,8 @@ void* Quantize::task(void* nullarg)
 	value = this->inPort< Token<float> >("inData")->read().getData();
 	temp_out=(int)(floor(value/quantization[i*8+j]+0.5));
 	//				cout << temp_out << " ";
-	Token<int>* pvt=new Token<int>(temp_out);
-	this->outPort< Token<int> >("outData")->write(*pvt);
+	Token<int> pvt(temp_out);
+	this->outPort< Token<int> >("outData")->write(pvt);
 	//output.write(temp_out);
       }
       //			cout << endl;

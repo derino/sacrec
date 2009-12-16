@@ -41,7 +41,8 @@ void* Source1::task(void* nullarg)
   int i;
   for(i=0; i<5; i++)
     {
-      this->outPort< Token<int> >("out")->write( *(new Token<int>(data[i])) );
+      Token<int> d(data[i]);
+      this->outPort< Token<int> >("out")->write(d);
       LOG4CXX_TRACE(Logger::getLogger("application"), 
 		    this->name << " wrote "  << data[i]
 		    );

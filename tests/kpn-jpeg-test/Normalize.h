@@ -63,8 +63,8 @@ void* Normalize::task(void* nullarg)
 	value = this->inPort< Token<int> >("inData")->read().getData();
 	temp_out=value * quantization[i*8+j];
 	//cout << temp_out << " ";
-	Token<float>* pvt=new Token<float>(temp_out);
-	this->outPort< Token<float> >("outData")->write(*pvt);
+	Token<float> pvt(temp_out);
+	this->outPort< Token<float> >("outData")->write(pvt);
 	//	output.write(temp_out);
       }
       //cout << endl;

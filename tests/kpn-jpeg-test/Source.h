@@ -60,6 +60,7 @@ Source::~Source()
 {
   //close file in destructor
   stimulusfile->close();
+  delete stimulusfile;
   LOG4CXX_DEBUG(Logger::getLogger("application"),
                 this->name << " is destructed."
                 );
@@ -92,17 +93,17 @@ void* Source::task(void* nullarg)
 		  );
     return NULL;
   }
-  Token<int>* wt=new Token<int>(width);
-  this->outPort< Token<int> >("outParam")->write(*wt);
+  Token<int> wt(width);
+  this->outPort< Token<int> >("outParam")->write(wt);
 
   *stimulusfile >> height;
-  Token<int>* ht=new Token<int>(height);
-  this->outPort< Token<int> >("outParam")->write(*ht);
+  Token<int> ht(height);
+  this->outPort< Token<int> >("outParam")->write(ht);
 
   // read in and put out max gray value                                                                                                  
   *stimulusfile >> value;
-  Token<int>* vt=new Token<int>(value);
-  this->outPort< Token<int> >("outParam")->write(*vt);
+  Token<int> vt(value);
+  this->outPort< Token<int> >("outParam")->write(vt);
 
   LOG4CXX_DEBUG(Logger::getLogger("application"),
 		this->name << ": inputfile:: width: " << width<< " height: " << height<< " greyvalue: " << value
@@ -120,8 +121,8 @@ void* Source::task(void* nullarg)
 	}
       pixels++;
       *stimulusfile >> value;
-      Token<int>* pvt=new Token<int>(value);
-      this->outPort< Token<int> >("outData")->write(*pvt);
+      Token<int> pvt(value);
+      this->outPort< Token<int> >("outData")->write(pvt);
     }
   
   LOG4CXX_DEBUG(Logger::getLogger("application"),

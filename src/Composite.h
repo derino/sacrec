@@ -7,10 +7,11 @@ using namespace log4cxx;
 #include <cstdlib>
 #include <string>
 #include <map>
+#include <vector>
 //#include "boost/lambda/lambda.hpp"
 //#include "boost/function.hpp"
 #include "Component.h"
-
+//#include "IterableChannel.h"
 
 namespace sacre
 {
@@ -19,16 +20,26 @@ namespace sacre
   {
   public:
     Composite(std::string);
-    ~Composite();
+    virtual ~Composite();
     virtual void* task(void*);
-
+    
   protected:
+    std::vector<IterableChannel*> chVec;
     std::map<std::string, Component*> cMap;
     void addComponent(Component*);
     template <typename T>
       void addInPort(std::string, InPort<T>*);
     template <typename T>
       void addOutPort(std::string, OutPort<T>*);
+
+    static int i;
+    // FIXME: why bool!?
+    template <typename T>
+      bool connect(OutPort<T>*, InPort<T>*);
+    
+    template <typename T>
+      bool connect(InPort<T>*, OutPort<T>*);
+
   };
   
   
@@ -39,10 +50,20 @@ namespace sacre
 
   Composite::~Composite()
     {
-      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+       LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
 		    "Composite" << name << " is destructed."
 		    );
-    
+       for(std::map<std::string,Component*>::iterator it=cMap.begin();it!=cMap.end();it++)
+	 {
+	   delete it->second;
+	 }
+
+       for(std::vector<IterableChannel*>::iterator itr=chVec.begin();itr!=chVec.end();itr++)
+	 {
+	   delete *itr;
+	 }
+
+      
     }
   
   void Composite::addComponent(Component* c)
@@ -90,6 +111,34 @@ namespace sacre
     
     return NULL;
   }
+
+
+  int Composite::i = 0;
+
+  template <typename T>
+    bool Composite::connect(OutPort<T>* op, InPort<T>* ip)
+    {
+      // TODO: check if argument ports are already connected. return false if so. (warn and exit)
+      std::stringstream i_str;
+      i_str << ++i;
+      BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str() );
+      // TODO: if connect is called with wrong token type (e.g. int instead of Token<int>), op and ip may come as NULL. It needs to be checked.
+      ip->setChannel(ch);
+      op->setChannel(ch);
+      chVec.push_back(ch);
+
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    "connected: " << op->getFullName() << " >-----" << ch->getName() <<  "-----> " << ip->getFullName()
+		    );
+      return true;
+    }
+
+  template <typename T>
+    bool Composite::connect(InPort<T>* ip, OutPort<T>* op)
+    {
+      return connect(op, ip);
+    }
+ 
 
 }
 #endif

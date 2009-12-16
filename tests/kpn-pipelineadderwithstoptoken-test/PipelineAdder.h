@@ -13,6 +13,7 @@ class PipelineAdder : public Pipeline
 {
  public:
   PipelineAdder(std::string);
+  virtual ~PipelineAdder();
 };
 
 PipelineAdder::PipelineAdder(std::string name) : Pipeline(name)
@@ -24,5 +25,12 @@ PipelineAdder::PipelineAdder(std::string name) : Pipeline(name)
   addComponent(d);
   connect( ca->outPort< Token<int> >("out"), d->inPort< Token<int> >("in") );
 }
+
+PipelineAdder::~PipelineAdder()
+{
+  //  delete ca;
+  //  delete d;
+}
+
 
 #endif

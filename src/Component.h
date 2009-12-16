@@ -8,7 +8,7 @@ using namespace log4cxx;
 #include <cstdlib>
 #include <string>
 #include <map>
-#include "boost/any.hpp"
+//#include "boost/any.hpp"
 #include "Channel.h"
 #include "InPort.h"
 #include "OutPort.h"
@@ -21,9 +21,9 @@ namespace sacre
   {
   public:
     Component(std::string);
-    ~Component();
-    std::map<std::string, boost::any> inPorts;
-    std::map<std::string, boost::any> outPorts;
+    virtual ~Component();
+    std::map<std::string, IterableInPort*> inPorts;
+    std::map<std::string, IterableOutPort*> outPorts;
 
     void start(void);
     pthread_t getThread();
@@ -65,6 +65,17 @@ namespace sacre
       LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
 		    "Component" << name << " is destructed."
 		    );
+
+      for( std::map<std::string, IterableInPort*>::iterator it = inPorts.begin(); it != inPorts.end(); ++it )
+      {
+	delete it->second;
+      }
+
+      for( std::map<std::string, IterableOutPort*>::iterator i = outPorts.begin(); i != outPorts.end(); ++i )
+      {
+	delete i->second;
+      }
+      
     
       // IMPORTANT NOTE:
       // below join doesn't do what we intend to achieve. It is sometimes the case that
@@ -101,9 +112,9 @@ namespace sacre
   template <typename T>
     InPort<T>* Component::inPort( std::string portName)
     {
-      try
-	{
-	  std::map<std::string,boost::any>::iterator it;
+      // try
+      // {
+	  std::map<std::string,IterableInPort*>::iterator it;
 	  it = inPorts.find(portName);
 	  if( it == inPorts.end() )
 	    {
@@ -114,8 +125,8 @@ namespace sacre
 	    }
 	  else
 	    {
-	      IterableInPort* iip =  boost::any_cast< IterableInPort* >(inPorts[portName]);
-	      InPort<T>* ip =  dynamic_cast< InPort<T>* >(iip);
+	      //IterableInPort* iip =  boost::any_cast< IterableInPort* >(inPorts[portName]);
+	      InPort<T>* ip =  dynamic_cast< InPort<T>* >(inPorts[portName]);
 	      if(ip == NULL)
 		{
 		  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
@@ -125,23 +136,23 @@ namespace sacre
 		}
 	      return ip;
 	    }
-	}
+	  /*	}
       catch(boost::bad_any_cast&)
 	{
 	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
 			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
 			);
 	  exit(EXIT_FAILURE);
-	}
+	  }*/
       return NULL;
     }
 
   template <typename T>
     OutPort<T>* Component::outPort( std::string portName)
     {
-      try
-	{
-	  std::map<std::string,boost::any>::iterator it;
+      // try
+      //{
+	  std::map<std::string,IterableOutPort*>::iterator it;
 	  it = outPorts.find(portName);
 	  if( it == outPorts.end() )
 	    {
@@ -152,8 +163,8 @@ namespace sacre
 	    }
 	  else
 	    {
-	      IterableOutPort* iop =  boost::any_cast< IterableOutPort* >(outPorts[portName]);
-	      OutPort<T>* op =  dynamic_cast< OutPort<T>* >(iop);
+	      // IterableOutPort* iop =  boost::any_cast< IterableOutPort* >(outPorts[portName]);
+	      OutPort<T>* op =  dynamic_cast< OutPort<T>* >(outPorts[portName]);
 	      if(op == NULL)
 		{
 		  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
@@ -165,14 +176,14 @@ namespace sacre
 	      //OutPort<T>* op =  boost::any_cast< OutPort<T>* >(outPorts[portName]);
 	      //return op;
 	    }
-	}
+	  /*}
       catch(boost::bad_any_cast&)
 	{
 	  LOG4CXX_FATAL(Logger::getLogger("sacrec"), 
 			"FATAL ERROR: Tried to use " << name << "'s " << portName << " port with a different token type than its original type as defined in the component!\n"
 			);
 	  exit(EXIT_FAILURE);
-	}
+	  }*/
       return NULL;
     }
 
@@ -274,9 +285,9 @@ namespace sacre
   void Component::writeAllOutPortsStopToken()
   {
     // write all outports STOP_TOKEN
-    for( std::map<std::string, boost::any>::iterator i = outPorts.begin(); i != outPorts.end(); ++i )
+    for( std::map<std::string, IterableOutPort*>::iterator i = outPorts.begin(); i != outPorts.end(); ++i )
       {
-	IterableOutPort* iop = boost::any_cast<IterableOutPort*>(i->second);
+	IterableOutPort* iop = i->second;
 	iop->writeStopToken();
 	LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
 		      this->getName() << " wrote STOP_TOKEN"

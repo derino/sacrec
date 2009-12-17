@@ -63,7 +63,9 @@ namespace sacre
 	   delete *itr;
 	 }
 
-      
+       // Since composites share their inports and outports with the internal components, ~Component() destructor of the composite class tries to delete the ports a second time. Therefore we should remove the ports from the inports and outports lists in this desctructor so that nothing remains to free for composite's ~Component() destructor.
+       inPorts.clear();
+       outPorts.clear();
     }
   
   void Composite::addComponent(Component* c)

@@ -18,6 +18,7 @@ namespace sacre
     public:
       InPort(std::string _name);
       T read();
+      bool isEmpty(); //noxim-sacre integration
       virtual void disconnect();
     };
   
@@ -54,6 +55,15 @@ namespace sacre
     {
       // TODO: not implemented yet. It's here just to make IterableInPort polymorphic.
     }
+
+  //noxim-sacre integration
+  //-------------------------------------
+  template <typename T>
+    bool InPort<T>::isEmpty()
+    {
+      return this->channel->isEmpty();
+    }
+  //-------------------------------------
 
 }
 

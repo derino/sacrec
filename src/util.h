@@ -14,6 +14,61 @@ using namespace log4cxx;
 
 namespace sacre
 {
+  //TODO:free channel memory on exit
+  std::vector<IterableChannel*> chVec;
+  
+  static int i = 0;
+  
+  template <typename T>
+    bool connect(OutPort<T>* op, InPort<T>* ip)
+    {
+      // TODO: check if argument ports are already connected. return false if so. (warn and exit)
+      std::stringstream i_str;
+      i_str << ++i;
+      BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str() );
+      // TODO: if connect is called with wrong token type (e.g. int instead of Token<int>), op and ip may come as NULL. It needs to be checked.
+      ip->setChannel(ch);
+      op->setChannel(ch);
+      chVec.push_back(ch);
+
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    "connected: " << op->getFullName() << " >-----" << ch->getName() <<  "-----> " << ip->getFullName()
+		    );
+      return true;
+    }
+
+  /*Takes bound of blocking queue as parameter*/
+  template <typename T>
+    bool connect(OutPort<T>* op, InPort<T>* ip, int bound)
+    {
+      // TODO: check if argument ports are already connected. return false if so. (warn and exit)
+      std::stringstream i_str;
+      i_str << ++i;
+      BlockingQueue<T>* ch = new BlockingQueue<T>( "BlockingQueue" + i_str.str(), bound );
+      // TODO: if connect is called with wrong token type (e.g. int instead of Token<int>), op and ip may come as NULL. It needs to be checked.
+      ip->setChannel(ch);
+      op->setChannel(ch);
+      chVec.push_back(ch);
+
+      LOG4CXX_DEBUG(Logger::getLogger("sacrec"), 
+		    "connected: " << op->getFullName() << " >-----" << ch->getName() <<  "-----> " << ip->getFullName()
+		    );
+      return true;
+    }
+
+
+  template <typename T>
+    bool connect(InPort<T>* ip, OutPort<T>* op)
+    {
+      return connect(op, ip);
+    }
+
+  template <typename T>
+    bool connect(InPort<T>* ip, OutPort<T>* op, int bound)
+    {
+      return connect(op, ip, bound);
+    }
+ 
   
   /* template <typename T>
     void dump(std::map<std::string, boost::any> const& m);

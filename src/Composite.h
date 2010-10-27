@@ -12,6 +12,7 @@ using namespace log4cxx;
 //#include "boost/function.hpp"
 #include "Component.h"
 //#include "IterableChannel.h"
+#include "util.h"
 
 namespace sacre
 {
@@ -24,7 +25,7 @@ namespace sacre
     virtual void* task(void*);
     
   protected:
-    std::vector<IterableChannel*> chVec;
+    
     std::map<std::string, Component*> cMap;
     void addComponent(Component*);
     template <typename T>
@@ -32,14 +33,16 @@ namespace sacre
     template <typename T>
       void addOutPort(std::string, OutPort<T>*);
 
-    static int i;
+    /*
+      static int i;
+      std::vector<IterableChannel*> chVec;
     // FIXME: why bool!?
     template <typename T>
       bool connect(OutPort<T>*, InPort<T>*);
     
     template <typename T>
       bool connect(InPort<T>*, OutPort<T>*);
-
+    */
   };
   
   
@@ -58,14 +61,12 @@ namespace sacre
 	   delete it->second;
 	 }
 
-       for(std::vector<IterableChannel*>::iterator itr=chVec.begin();itr!=chVec.end();itr++)
+       /*for(std::vector<IterableChannel*>::iterator itr=chVec.begin();itr!=chVec.end();itr++)
 	 {
 	   delete *itr;
-	 }
+	   }*/
 
-       // Since composites share their inports and outports with the internal components, ~Component() destructor of the composite class tries to delete the ports a second time. Therefore we should remove the ports from the inports and outports lists in this desctructor so that nothing remains to free for composite's ~Component() destructor.
-       inPorts.clear();
-       outPorts.clear();
+      
     }
   
   void Composite::addComponent(Component* c)
@@ -114,7 +115,7 @@ namespace sacre
     return NULL;
   }
 
-
+  /*
   int Composite::i = 0;
 
   template <typename T>
@@ -140,7 +141,7 @@ namespace sacre
     {
       return connect(op, ip);
     }
- 
+ */
 
 }
 #endif

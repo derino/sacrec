@@ -16,13 +16,13 @@ Tests:
 
 TODO:
 +->define pipeline classes (add run() method )
-->stop token
++->stop token (problem with cyclic)
 ->unit test library
 ->generic components (Adder<int> a template)  only valid for all ports being of the same token type
 
 erkan:
 ->Check dotty for showing schema
-->use (Valgrind,NPTL trace tool) to check leakage
++->use (Valgrind,NPTL trace tool) to check leakage
 
 11 December 2009
 ---------------------------------------

@@ -7,7 +7,7 @@ using namespace log4cxx;
 namespace sacre
 {
 
-  enum TokenType { STOP_TOKEN, DATA_TOKEN };
+  enum TokenType { STOP_TOKEN, DATA_TOKEN, VIRTUAL_TOKEN };
   
   template <typename T>
   class Token

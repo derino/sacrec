@@ -46,7 +46,7 @@ namespace sacre
       void addInPort(std::string);
     template <typename T>
       void addOutPort(std::string);
-    void writeAllOutPortsStopToken();
+    virtual void writeAllOutPortsStopToken();
 
     pthread_t thread;
     // return value of pthread_create
@@ -281,6 +281,7 @@ namespace sacre
     {
       return name;
     }
+  
 
   void Component::writeAllOutPortsStopToken()
   {
